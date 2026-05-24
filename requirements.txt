@@ -1,0 +1,35 @@
+# fastapi>=0.114.0,<0.115.0
+# uvicorn==0.32.0
+# python-multipart==0.0.17
+r2r[core]
+python-dotenv==1.0.1
+requests==2.32.3
+zeroentropy==0.1.0a3  # Official ZeroEntropy client
+sqlalchemy==2.0.36
+alembic==1.13.3
+psycopg2-binary==2.9.10
+pytest==8.3.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+supertokens-python==0.27.0
+pydantic-ai
+apify-client==1.8.1
+opentelemetry-distro
+opentelemetry-exporter-otlp
+opentelemetry-instrumentation-logging
+nest-asyncio==1.6.0
+sparkpost==1.3.10
+apify-client==1.8.1
+# r2r==3.3.32
+stripe==11.6.0
+firecrawl-py
+logfire
+redis[hiredis]==6.2.0
+sentence-transformers
+pgvector
+numpy>=1.24.0
+aiohttp>=3.8.0
+streamlit>=1.28.0
+plotly>=5.15.0
+pandas>=2.0.0 
+httpx>=0.25.0
