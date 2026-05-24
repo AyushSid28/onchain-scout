@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+venv312/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+secrets.json
+data/creds.txt
+
+# Local databases, caches, and generated outputs
+*.rdb
+dump.rdb
+output/
+outputs/
+evaluation_result_docker.json
+source/agents/rugpool_detection/outputs/
+source/agents/rugpool_detection/liquidity_snapshots/
+
+# OS and editor files
+.DS_Store
+.idea/
+.vscode/
