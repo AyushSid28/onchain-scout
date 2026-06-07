@@ -1,0 +1,94 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - TWITTER_SERVICE_URL=http://twitter-service:8001
+      - TWITTER_SERVICE_ASYNC_MODE=true
+      - TWITTER_SERVICE_MAX_POLL_TIME=300
+    depends_on:
+      redis:
+        condition: service_healthy
+      twitter-service:
+        condition: service_healthy
+    networks:
+      - app-network
+    volumes:
+      - ./:/onchain-scout
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  twitter-service:
+    build:
+      context: .
+      dockerfile: twitter_service/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - PYTHONPATH=/app
+      # Queue management settings
+      - TWITTER_REQUEST_RATE_LIMIT=5
+      - TWITTER_MAX_QUEUE_SIZE=10000
+      - TWITTER_MAX_WORKERS=3
+      - TWITTER_RESULT_TTL=3600
+      - TWITTER_STATUS_TTL=7200
+      - TWITTER_REQUEST_TIMEOUT=300
+      # Circuit breaker settings
+      - TWITTER_CB_FAILURE_THRESHOLD=5
+      - TWITTER_CB_RECOVERY_TIMEOUT=60
+      # Monitoring settings
+      - TWITTER_METRICS_RETENTION_HOURS=24
+      - TWITTER_HEALTH_CHECK_INTERVAL=30
+      # Cache settings
+      - TWITTER_CACHE_ENABLED=true
+      - TWITTER_CACHE_TTL_USER_INFO=3600
+      - TWITTER_CACHE_TTL_TWEETS=900
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+    volumes:
+      - ./twitter_service:/app/twitter_service
+      - ./configs:/app/configs
+      - ./secrets.json:/app/secrets.json
+    restart: unless-stopped
+    command: uvicorn api:app --host 0.0.0.0 --port 8001 --reload
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  redis-data:
